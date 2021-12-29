@@ -1,1 +1,119 @@
-import { S as b, P as x, W as v, A, a as S, b as M, c as P, d as z, T as p, M as m, B as O, e as B, f as T, g as w, O as j, h as G } from "./vendor.4df69ec3.js"; const R = function () { const r = document.createElement("link").relList; if (r && r.supports && r.supports("modulepreload")) return; for (const e of document.querySelectorAll('link[rel="modulepreload"]')) l(e); new MutationObserver(e => { for (const o of e) if (o.type === "childList") for (const f of o.addedNodes) f.tagName === "LINK" && f.rel === "modulepreload" && l(f) }).observe(document, { childList: !0, subtree: !0 }); function c(e) { const o = {}; return e.integrity && (o.integrity = e.integrity), e.referrerpolicy && (o.referrerPolicy = e.referrerpolicy), e.crossorigin === "use-credentials" ? o.credentials = "include" : e.crossorigin === "anonymous" ? o.credentials = "omit" : o.credentials = "same-origin", o } function l(e) { if (e.ep) return; e.ep = !0; const o = c(e); fetch(e.href, o) } }; R(); console.log("hi"); const i = new b, n = new x(75, window.innerWidth / window.innerHeight, .1, 1e3), u = new v({ canvas: document.querySelector("#bg") }); u.setPixelRatio(window.devicePixelRatio); u.setSize(window.innerWidth, window.innerHeight); n.position.setZ(30); n.position.setX(-3); u.render(i, n); const y = new A; n.add(y); const a = new S(y), W = new M; W.load("audio/space.ogg", function (t) { a.setBuffer(t), a.setLoop(!0), a.setVolume(.5), a.play(), a.autoplay = !0 }); const g = new P(16777215); g.position.set(5, 5, 5); const q = new z(4210752); i.add(g, q); function C() { const t = new j(.6), r = new w({ color: 16777215 }), c = new m(t, r), [l, e, o] = Array(3).fill().map(() => G.randFloatSpread(150)); c.position.set(l, e, o), i.add(c) } Array(200).fill().forEach(C); const F = new p().load("space-1.jpg"); i.background = F; const N = new p().load("ava.jpg"), s = new m(new O(3, 3, 3), new B({ map: N })); i.add(s); const E = new p().load("abama.jpg"), d = new m(new T(3, 32, 32), new w({ map: E })); i.add(d); d.position.z = 35; d.position.setX(-10); s.position.z = -5; s.position.x = 2; function h() { const t = document.body.getBoundingClientRect().top; d.rotation.y += .075, s.rotation.y += .01, s.rotation.z += .01, n.position.z = t * -.01, n.position.x = t * -2e-4, n.rotation.y = t * -2e-4 } document.body.onscroll = h; h(); function L() { requestAnimationFrame(L), d.rotation.y += .002, u.render(i, n) } L();
+import './style.css'
+import * as THREE from 'three';
+import { AmbientLight } from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
+console.log('hi');
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGL1Renderer({
+	canvas: document.querySelector('#bg'),
+});
+
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+camera.position.setZ(30);
+camera.position.setX(-3);
+
+renderer.render(scene, camera);
+
+
+
+setTimeout(() => {
+	// create an AudioListener and add it to the camera
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+// create a global audio source
+const sound = new THREE.Audio(listener);
+
+// load a sound and set it as the Audio object's buffer
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load('audio/space.ogg', function (buffer) {
+	sound.setBuffer(buffer);
+	sound.setLoop(true);
+	sound.setVolume(0.5);
+	sound.play();
+});
+}, 3000);
+
+const pointLight = new THREE.PointLight(0xffffff)
+pointLight.position.set(5, 5, 5);
+
+const ambientLight = new THREE.AmbientLight(0x404040)
+scene.add(pointLight, ambientLight)
+
+//Helpers
+// const lightHelper = new THREE.PointLightHelper(pointLight)
+// const gridHelper = new THREE.GridHelper(200, 50);
+// const controls = new OrbitControls(camera, renderer.domElement);
+// scene.add(lightHelper, gridHelper)
+
+
+function addStar() {
+	const geometry = new THREE.OctahedronGeometry(0.6)
+	const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
+	const star = new THREE.Mesh(geometry, material)
+
+	const [x, y, z] = Array(3).fill()
+		.map(() => THREE.MathUtils.randFloatSpread(150));
+
+	star.position.set(x, y, z);
+	scene.add(star)
+}
+
+Array(200).fill().forEach(addStar)
+
+const spaceTexture = new THREE.TextureLoader().load('space-1.jpg');
+scene.background = spaceTexture;
+
+//Avatar
+const danilTexture = new THREE.TextureLoader().load('ava.jpg');
+const danil = new THREE.Mesh(
+	new THREE.BoxGeometry(3, 3, 3), new THREE.MeshBasicMaterial({ map: danilTexture })
+)
+scene.add(danil)
+
+//Abama
+const abamaTexture = new THREE.TextureLoader().load('abama.jpg');
+
+const abama = new THREE.Mesh(
+	new THREE.SphereGeometry(3, 32, 32),
+	new THREE.MeshStandardMaterial({ map: abamaTexture, })
+)
+scene.add(abama)
+
+
+abama.position.z = 35;
+abama.position.setX(-10);
+
+danil.position.z = -5;
+danil.position.x = 2;
+
+// Scroll Animation
+
+function moveCamera() {
+	const t = document.body.getBoundingClientRect().top;
+	abama.rotation.y += 0.075;
+
+	danil.rotation.y += 0.01;
+	danil.rotation.z += 0.01;
+
+	camera.position.z = t * -0.01;
+	camera.position.x = t * -0.0002;
+	camera.rotation.y = t * -0.0002;
+}
+
+document.body.onscroll = moveCamera;
+moveCamera();
+
+function animate() {
+	requestAnimationFrame(animate);
+
+	// controls.update();
+
+	abama.rotation.y += 0.002;
+	renderer.render(scene, camera);
+}
+animate();
